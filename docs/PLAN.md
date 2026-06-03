@@ -24,28 +24,28 @@ Root URL: `https://cars.bidspirit.com/ui/home/?lang=he`
 
 ## 2. Confirmed decisions
 
-| Decision | Choice |
-|---|---|
-| Repo/Deploy | User provides GitHub + Railway tokens; agent provisions end-to-end |
-| Extraction strategy | Probe live site first; **API/network interception primary**, DOM fallback |
-| Secrets | `.env.example` placeholders only — no real secrets committed |
-| Test depth | Full per spec: unit + integration + API + e2e smoke, plus ESLint/Prettier + CI |
-| Railway topology | **Persistent dashboard service** + **separate scheduled cron service** for the scraper |
-| Code location | `C:\Users\erang\OneDrive\Desktop\Eran's dev\Bidspirit` |
-| GitHub repo | `eranganot/auction` — **public** — https://github.com/eranganot/auction |
-| Railway account | User's **personal** account; new project |
-| Per-phase workflow | After each phase: **full QA + validation**, then **commit to production** (push to `main`) |
+| Decision            | Choice                                                                                     |
+| ------------------- | ------------------------------------------------------------------------------------------ |
+| Repo/Deploy         | User provides GitHub + Railway tokens; agent provisions end-to-end                         |
+| Extraction strategy | Probe live site first; **API/network interception primary**, DOM fallback                  |
+| Secrets             | `.env.example` placeholders only — no real secrets committed                               |
+| Test depth          | Full per spec: unit + integration + API + e2e smoke, plus ESLint/Prettier + CI             |
+| Railway topology    | **Persistent dashboard service** + **separate scheduled cron service** for the scraper     |
+| Code location       | `C:\Users\erang\OneDrive\Desktop\Eran's dev\Bidspirit`                                     |
+| GitHub repo         | `eranganot/auction` — **public** — https://github.com/eranganot/auction                    |
+| Railway account     | User's **personal** account; new project                                                   |
+| Per-phase workflow  | After each phase: **full QA + validation**, then **commit to production** (push to `main`) |
 
 ### Default seed filter (`UserFilter`)
 
-| Criterion | Value |
-|---|---|
-| שנת מודל מינימלית (min year) | **2022** |
-| קילומטראז' מקסימלי (max mileage) | **100,000 ק"מ** |
-| מספר יד מקסימלי (max hand) | **3** |
-| מחיר מקסימלי (max price) | **none (no cap)** |
-| סוג גיר (transmission) | **AUTOMATIC only** |
-| בעלות (ownership) | all |
+| Criterion                        | Value              |
+| -------------------------------- | ------------------ |
+| שנת מודל מינימלית (min year)     | **2022**           |
+| קילומטראז' מקסימלי (max mileage) | **100,000 ק"מ**    |
+| מספר יד מקסימלי (max hand)       | **3**              |
+| מחיר מקסימלי (max price)         | **none (no cap)**  |
+| סוג גיר (transmission)           | **AUTOMATIC only** |
+| בעלות (ownership)                | all                |
 
 ---
 
@@ -86,17 +86,17 @@ Principles enforced:
 
 ## 5. Phase index
 
-| # | Phase | File | Status |
-|---|---|---|---|
-| 0 | Recon & live API discovery | [00-recon.md](./phases/00-recon.md) | ☐ |
-| 1 | Monorepo scaffold & tooling | [01-scaffold.md](./phases/01-scaffold.md) | ☐ |
-| 2 | Database & Prisma schema | [02-database.md](./phases/02-database.md) | ☐ |
-| 3 | Shared package (logic core) | [03-shared.md](./phases/03-shared.md) | ☐ |
-| 4 | Worker (scraper + cron) | [04-worker.md](./phases/04-worker.md) | ☐ |
-| 5 | Dashboard (API + Hebrew UI) | [05-dashboard.md](./phases/05-dashboard.md) | ☐ |
-| 6 | Tests & CI | [06-tests.md](./phases/06-tests.md) | ☐ |
-| 7 | Deployment artifacts | [07-deployment.md](./phases/07-deployment.md) | ☐ |
-| 8 | Provision GitHub + Railway & ship | [08-provision.md](./phases/08-provision.md) | ☐ |
+| #   | Phase                             | File                                          | Status |
+| --- | --------------------------------- | --------------------------------------------- | ------ |
+| 0   | Recon & live API discovery        | [00-recon.md](./phases/00-recon.md)           | ☐      |
+| 1   | Monorepo scaffold & tooling       | [01-scaffold.md](./phases/01-scaffold.md)     | ☐      |
+| 2   | Database & Prisma schema          | [02-database.md](./phases/02-database.md)     | ☐      |
+| 3   | Shared package (logic core)       | [03-shared.md](./phases/03-shared.md)         | ☐      |
+| 4   | Worker (scraper + cron)           | [04-worker.md](./phases/04-worker.md)         | ☐      |
+| 5   | Dashboard (API + Hebrew UI)       | [05-dashboard.md](./phases/05-dashboard.md)   | ☐      |
+| 6   | Tests & CI                        | [06-tests.md](./phases/06-tests.md)           | ☐      |
+| 7   | Deployment artifacts              | [07-deployment.md](./phases/07-deployment.md) | ☐      |
+| 8   | Provision GitHub + Railway & ship | [08-provision.md](./phases/08-provision.md)   | ☐      |
 
 ---
 

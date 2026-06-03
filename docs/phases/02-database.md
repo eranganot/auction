@@ -4,6 +4,7 @@
 tracking, accessed only through `/packages/database`.
 
 ## Entities
+
 - **Auction** (catalog): externalId (unique), title, status, startsAt, endsAt, url,
   firstSeenAt, lastSeenAt, timestamps.
 - **Car** (auction lot): the core record.
@@ -22,17 +23,20 @@ tracking, accessed only through `/packages/database`.
   Also serves as the **execution lock** (one RUNNING row at a time).
 
 ## Enums
+
 - `Transmission { AUTOMATIC, MANUAL, ROBOTIC, UNKNOWN }`
 - `Ownership { PRIVATE, COMPANY, LEASING, RENTAL, GOV, UNKNOWN }`
 - `NotificationChannel`, `ScrapeStatus`, `AuctionStatus`.
 
 ## Indexes
+
 - Car: unique(lotUrl), index(modelYear), index(openingPrice), index(lastStatus),
   index(notificationSentAt).
 - Auction: unique(externalId), index(status).
 - Notification: unique(carId, channel).
 
 ## Steps
+
 1. Define `schema.prisma` with the above.
 2. `prisma migrate dev --name init` → committed migration.
 3. Export a singleton Prisma client + typed repository helpers (cars, auctions,
@@ -40,5 +44,6 @@ tracking, accessed only through `/packages/database`.
 4. Seed script: one default `UserFilter` (sensible Israeli-market defaults).
 
 ## Exit criteria
+
 Migration applies to a fresh Postgres; repository helpers compile and expose
 UPSERT-by-lot and "new unnotified matches" queries.

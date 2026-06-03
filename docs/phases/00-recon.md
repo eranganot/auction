@@ -5,10 +5,12 @@ scraper can prefer JSON/API interception over fragile DOM parsing. This phase de
 the entire scraper.
 
 ## Why first
+
 The spec mandates API-interception-first extraction and explicit archive filtering.
 Both require knowing the real network calls and how "live vs archived" is encoded.
 
 ## Steps
+
 1. Load `https://cars.bidspirit.com/ui/home/?lang=he` in an instrumented browser.
 2. Capture all XHR/fetch traffic while:
    - the home/catalog list renders,
@@ -26,15 +28,18 @@ Both require knowing the real network calls and how "live vs archived" is encode
 7. Save anonymized sample payloads as test fixtures.
 
 ## Deliverables
+
 - `docs/RECON.md` — endpoints, params, pagination, status semantics, field map.
 - `apps/worker/test/fixtures/*.json` + `*.html` — captured samples for tests.
 - Decision recorded: primary path (API) + fallback path (DOM) per data type.
 
 ## Exit criteria
+
 We can name the exact endpoint(s) that return catalogs and lots, know how to page
 through them, know how to tell live from archived, and have fixtures saved.
 
 ## Risk / fallback
+
 If endpoints are obfuscated or gated, fall back to DOM extraction with resilient
 semantic locators (role/text based), still filtering archived catalogs by visible
 status text. Document whichever path is chosen.

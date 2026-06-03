@@ -4,6 +4,7 @@
 (API-first), normalize, UPSERT, match, notify — on a daily schedule with locking.
 
 ## Modules (`/apps/worker/src`)
+
 1. **browser.ts** — Playwright launcher with stealth flags, rotating user agents,
    randomized delays (`SCRAPER_DELAY_MIN/MAX`), timeouts (`SCRAPER_TIMEOUT`),
    headless toggle (`SCRAPER_HEADLESS`).
@@ -29,10 +30,12 @@
    detailed error context logged and stored in `ScrapeRun.errorLog`.
 
 ## Resilience checklist
+
 retry logic ▸ randomized delays ▸ graceful recovery ▸ anti-bot stealth ▸ rotating UA ▸
 timeouts ▸ responsible throttling ▸ per-catalog isolation.
 
 ## Exit criteria
+
 Against Phase 0 fixtures: discovery filters archived, extraction parses all fields,
 pipeline upserts idempotently, matching+notify fire once per new match, ScrapeRun
 stats populated, lock prevents concurrent runs.

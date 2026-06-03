@@ -3,6 +3,7 @@
 **Goal:** Centralize every cross-cutting piece of logic so nothing is duplicated.
 
 ## Modules (`/packages/shared/src`)
+
 1. **config.ts** — load + validate all env vars (PLAN.md §7), typed, fail-fast with
    clear errors. Defaults for scraper delays/timeouts.
 2. **logger.ts** — structured JSON logger (timestamp, level, context, scrape stats).
@@ -30,5 +31,6 @@
 8. **constants.ts** — centralized selectors + API endpoint constants (from Phase 0).
 
 ## Exit criteria
+
 Each module independently importable & typed; matching + normalization + enum mapping
 covered by unit tests in Phase 6; notifiers callable with injected config.

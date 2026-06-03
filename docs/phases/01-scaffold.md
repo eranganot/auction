@@ -4,6 +4,7 @@
 shared tooling so every later phase has a clean home.
 
 ## Layout
+
 ```
 /apps/worker
 /apps/dashboard
@@ -12,6 +13,7 @@ shared tooling so every later phase has a clean home.
 ```
 
 ## Steps
+
 1. Root `package.json` with npm workspaces (`apps/*`, `packages/*`) and root scripts:
    `build`, `test`, `lint`, `format`, `migrate`, `dev:dashboard`, `dev:worker`,
    `worker:once` (one-shot cron mode).
@@ -23,10 +25,12 @@ shared tooling so every later phase has a clean home.
 6. Jest base config wired at root with per-package overrides.
 
 ## Conventions
+
 - All packages publish a typed entry (`src/index.ts`).
 - No hardcoded values — everything via `@bidspirit/shared` config.
 - Path aliases: `@bidspirit/shared`, `@bidspirit/database`.
 
 ## Exit criteria
+
 `npm install` then `npm run build` compiles all empty packages with zero TS errors;
 `npm run lint` passes.

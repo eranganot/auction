@@ -3,16 +3,19 @@
 **Goal:** Create the remote repo, push, and stand up the Railway project end-to-end.
 
 ## Prerequisites (from user)
+
 - GitHub PAT (scope `repo`) — provided. Repo name + visibility (public/private) — confirm.
 - Railway API token — **needed** (see below). Existing team or new — confirm.
 
 ## Steps — GitHub
+
 1. `git init`, add `.gitignore` (ensure `.env`, artifacts excluded).
 2. Create remote repo via GitHub API with the PAT.
 3. Initial commit + push `main`.
 4. Verify CI workflow runs.
 
 ## Steps — Railway
+
 1. Authenticate Railway CLI / API with token.
 2. Create new project.
 3. Add **PostgreSQL** plugin → provides `DATABASE_URL`.
@@ -25,9 +28,11 @@
 7. Smoke-check: dashboard reachable, migrations applied, manual worker run populates DB.
 
 ## Security
+
 - Never commit secrets. GH token used only for provisioning; recommend rotation after.
 - `.env` git-ignored; only `.env.example` committed.
 
 ## Exit criteria
+
 Repo live on GitHub; Railway project with Postgres + dashboard + cron worker running;
 dashboard serves Hebrew UI; migrations applied; documented in README.

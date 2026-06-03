@@ -4,6 +4,7 @@
 persistent dashboard service, and a scheduled cron worker service.
 
 ## Artifacts
+
 1. **Dockerfile** — based on official Playwright image (browsers preinstalled);
    multi-stage: install deps → build → run. Supports both `dashboard` and `worker`
    entrypoints via start command / env.
@@ -19,6 +20,7 @@ persistent dashboard service, and a scheduled cron worker service.
 5. **.dockerignore**.
 
 ## README.md (English) — must cover
+
 - Project overview & architecture diagram.
 - Setup & local development (`npm install`, local Postgres, `prisma migrate dev`,
   `npm run dev:dashboard`, `npm run worker:once`).
@@ -32,5 +34,6 @@ persistent dashboard service, and a scheduled cron worker service.
 - Note: app UI is Hebrew; README is English.
 
 ## Exit criteria
+
 Clean checkout builds the Docker image; Railway config defines all three pieces;
 README lets a new dev deploy unassisted.
