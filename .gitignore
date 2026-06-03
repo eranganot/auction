@@ -1,0 +1,32 @@
+# deps & build
+node_modules/
+dist/
+*.tsbuildinfo
+
+# env & secrets
+.env
+.env.*
+!.env.example
+
+# prisma
+packages/database/prisma/*.db
+
+# scraper runtime artifacts
+artifacts/
+apps/worker/artifacts/
+*.png
+!docs/**/*.png
+
+# logs
+*.log
+npm-debug.log*
+
+# os / editor
+.DS_Store
+.idea/
+.vscode/
+coverage/
+
+# playwright
+/test-results/
+/playwright-report/

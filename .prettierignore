@@ -1,0 +1,6 @@
+dist
+**/dist
+node_modules
+coverage
+packages/database/src/generated
+apps/worker/test/fixtures

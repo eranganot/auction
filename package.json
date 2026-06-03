@@ -1,0 +1,44 @@
+{
+  "name": "bidspirit-auction-monitor",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Discover, scrape, filter, store and monitor car auctions from Bidspirit Cars.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "tsc --build --clean && rimraf \"**/dist\"",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write \"**/*.{ts,js,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,js,json,md}\"",
+    "test": "jest",
+    "db:generate": "npm -w @bidspirit/database run generate",
+    "db:migrate": "npm -w @bidspirit/database run migrate",
+    "db:deploy": "npm -w @bidspirit/database run deploy",
+    "db:seed": "npm -w @bidspirit/database run seed",
+    "dev:dashboard": "npm -w @bidspirit/dashboard run dev",
+    "dev:worker": "npm -w @bidspirit/worker run dev",
+    "start:dashboard": "npm -w @bidspirit/dashboard run start",
+    "start:worker": "npm -w @bidspirit/worker run start",
+    "worker:once": "npm -w @bidspirit/worker run once"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.14.0",
+    "@typescript-eslint/eslint-plugin": "^7.13.0",
+    "@typescript-eslint/parser": "^7.13.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.3.2",
+    "rimraf": "^5.0.7",
+    "ts-jest": "^29.1.5",
+    "typescript": "^5.5.2"
+  }
+}

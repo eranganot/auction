@@ -1,0 +1,134 @@
+{
+  "auctionsLists": {
+    "UPCOMING": [
+      {
+        "intKey": 75783,
+        "houseCode": "federlaw",
+        "name": "11 רכבים מכונס נכסים אופיר פדר",
+        "number": "",
+        "part": "",
+        "date": "2026-06-03",
+        "time": "10:00",
+        "state": "RUNNING",
+        "contentType": "CARS",
+        "startTimeMillis": 1780470000000,
+        "hidden": false,
+        "region": "IL"
+      },
+      {
+        "intKey": 75921,
+        "houseCode": "carmi-law",
+        "name": "רכב מכונס נכסים",
+        "number": "",
+        "part": "",
+        "date": "2026-06-03",
+        "time": "12:00",
+        "state": "READY",
+        "contentType": "CARS",
+        "startTimeMillis": 1780477200000,
+        "hidden": false,
+        "region": "IL"
+      },
+      {
+        "intKey": 75837,
+        "houseCode": "ariehagai",
+        "name": "4 רכבים מכונס נכסים",
+        "number": "",
+        "part": "",
+        "date": "2026-06-03",
+        "time": "15:00",
+        "state": "READY",
+        "contentType": "CARS",
+        "startTimeMillis": 1780488000000,
+        "hidden": false,
+        "region": "IL"
+      },
+      {
+        "intKey": 66911,
+        "houseCode": "ghm",
+        "name": "רכבים מכונס נכסים - סניף כפר סבא",
+        "number": "",
+        "part": "",
+        "date": "2026-06-04",
+        "time": "09:00",
+        "state": "READY",
+        "contentType": "CARS",
+        "startTimeMillis": 1780552800000,
+        "hidden": false,
+        "region": "IL"
+      },
+      {
+        "intKey": 75269,
+        "houseCode": "iec",
+        "name": "הליך למכירת דלתות לרכב מגן שורק מכרז מס' 1479-26",
+        "number": null,
+        "part": "",
+        "date": "2026-06-04",
+        "time": "10:00",
+        "state": "READY",
+        "contentType": "CARS",
+        "startTimeMillis": 1780556400000,
+        "hidden": false,
+        "region": "IL"
+      },
+      {
+        "intKey": 76555,
+        "houseCode": "fa-firm",
+        "name": "כלי רכב מכונס נכסים",
+        "number": "3",
+        "part": "",
+        "date": "2026-06-04",
+        "time": "11:00",
+        "state": "PENDING",
+        "contentType": "CARS",
+        "startTimeMillis": 1780560000000,
+        "hidden": false,
+        "region": "IL"
+      },
+      {
+        "intKey": 76492,
+        "houseCode": "ezra-law-office",
+        "name": "התמחרות אינטרנטית - רכישת כלי נשק או כלי יריה או מיטלטלין",
+        "number": "",
+        "part": "",
+        "date": "2026-06-18",
+        "time": "12:00",
+        "state": "READY",
+        "contentType": "MACHINES",
+        "startTimeMillis": 1781773200000,
+        "hidden": false,
+        "region": "IL"
+      }
+    ],
+    "ENDED": [
+      {
+        "intKey": 76344,
+        "houseCode": "dt-law",
+        "name": "רכב מכונס נכסים",
+        "number": "",
+        "part": "",
+        "date": "2026-06-02",
+        "time": "13:30",
+        "state": "ENDED",
+        "contentType": "CARS",
+        "startTimeMillis": 1780396200000,
+        "hidden": false,
+        "region": "IL"
+      },
+      {
+        "intKey": 76232,
+        "houseCode": "dtkgg",
+        "name": "רכב מכונס נכסים",
+        "number": "",
+        "part": "",
+        "date": "2026-06-02",
+        "time": "13:00",
+        "state": "ENDED",
+        "contentType": "CARS",
+        "startTimeMillis": 1780394400000,
+        "hidden": false,
+        "region": "IL"
+      }
+    ]
+  }
+}
