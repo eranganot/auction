@@ -1,2 +1,2 @@
-// @bidspirit/database — Prisma client + repositories. Implemented in Phase 2.
-export const DATABASE_PACKAGE = '@bidspirit/database';
+// @bidspirit/database — the only module that talks to Prisma directly.
+// Apps and the shared package consume the typed repository he

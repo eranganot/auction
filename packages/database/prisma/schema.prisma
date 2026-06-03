@@ -1,0 +1,200 @@
+// Prisma schema for the Bidspirit Cars auction monitoring platform.
+// Source of truth for the PostgreSQL data model. Accessed ONLY through
+// the @bidspirit/database package (apps never import Prisma directly).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums — internal, normalized values. Hebrew source strings are mapped to
+// these in @bidspirit/shared, always with an UNKNOWN fallback so ingestion
+// can never crash on an unexpected value.
+// ---------------------------------------------------------------------------
+
+enum Transmission {
+  AUTOMATIC
+  MANUAL
+  ROBOTIC
+  UNKNOWN
+}
+
+enum Ownership {
+  PRIVATE
+  COMPANY
+  LEASING
+  RENTAL
+  GOV
+  UNKNOWN
+}
+
+enum AuctionStatus {
+  PENDING
+  READY
+  RUNNING
+  ENDED
+  UNKNOWN
+}
+
+enum NotificationChannel {
+  TELEGRAM
+  EMAIL
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+enum ScrapeStatus {
+  RUNNING
+  SUCCESS
+  FAILED
+}
+
+// ---------------------------------------------------------------------------
+// Auction (catalog)
+// ---------------------------------------------------------------------------
+
+model Auction {
+  id          Int           @id @default(autoincrement())
+  // Stable Bidspirit catalog key (intKey). Unique → UPSERT target.
+  externalId  String        @unique
+  title       String
+  status      AuctionStatus @default(UNKNOWN)
+  houseCode   String?
+  startsAt    DateTime?
+  endsAt      DateTime?
+  url         String?
+  firstSeenAt DateTime      @default(now())
+  lastSeenAt  DateTime      @default(now())
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  cars Car[]
+
+  @@index([status])
+  @@index([startsAt])
+}
+
+// ---------------------------------------------------------------------------
+// Car (auction lot) — the core record
+// ---------------------------------------------------------------------------
+
+model Car {
+  id Int @id @default(autoincrement())
+
+  // Identity / UPSERT keys
+  lotId  String // stable Bidspirit lot id (idInApp); unique within an auction
+  lotUrl String @unique // deterministic public lot URL — primary UPSERT key
+
+  // Vehicle attributes (normalized)
+  makeModel    String
+  modelYear    Int?
+  dateOnRoad   DateTime?
+  mileage      Int?
+  transmission Transmission @default(UNKNOWN)
+  hand         Int?
+  ownership    Ownership    @default(UNKNOWN)
+  tariffPrice  Int? // מחיר מחירון — nullable (often absent pre-live)
+  openingPrice Int? // מחיר פתיחה — nullable (often absent pre-live)
+
+  imageUrl String?
+
+  // State tracking
+  firstSeenAt        DateTime  @default(now())
+  lastSeenAt         DateTime  @default(now())
+  lastPrice          Int?
+  lastStatus         String?
+  notificationSentAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  auctionId Int
+  auction   Auction @relation(fields: [auctionId], references: [id], onDelete: Cascade)
+
+  notifications Notification[]
+
+  @@unique([auctionId, lotId])
+  @@index([modelYear])
+  @@index([mileage])
+  @@index([openingPrice])
+  @@index([transmission])
+  @@index([lastStatus])
+  @@index([notificationSentAt])
+  @@index([auctionId])
+}
+
+// ---------------------------------------------------------------------------
+// UserFilter (preferences) — single-admin MVP; userId reserved for future
+// multi-user. Enum-array fields mean "any of"; empty array means "no constraint".
+// ---------------------------------------------------------------------------
+
+model UserFilter {
+  id            Int            @id @default(autoincrement())
+  name          String         @default("default")
+  minModelYear  Int?
+  minDateOnRoad DateTime?
+  maxMileage    Int?
+  maxHand       Int?
+  maxPrice      Int?
+  transmission  Transmission[] // empty = any
+  ownership     Ownership[] // empty = any
+  isActive      Boolean        @default(true)
+
+  // Reserved for future multi-user support.
+  userId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+}
+
+// ---------------------------------------------------------------------------
+// Notification — unique on (carId, channel) prevents repeat alerts
+// ---------------------------------------------------------------------------
+
+model Notification {
+  id        Int                 @id @default(autoincrement())
+  carId     Int
+  car       Car                 @relation(fields: [carId], references: [id], onDelete: Cascade)
+  channel   NotificationChannel
+  status    NotificationStatus  @default(PENDING)
+  payload   String? // rendered message / recipients summary (Text)
+  error     String?
+  sentAt    DateTime?
+  createdAt DateTime            @default(now())
+
+  @@unique([carId, channel])
+  @@index([channel])
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// ScrapeRun — observability + execution lock (one RUNNING row at a time)
+// ---------------------------------------------------------------------------
+
+model ScrapeRun {
+  id                 Int          @id @default(autoincrement())
+  startedAt          DateTime     @default(now())
+  finishedAt         DateTime?
+  durationMs         Int?
+  catalogsProcessed  Int          @default(0)
+  carsScraped        Int          @default(0)
+  carsMatched        Int          @default(0)
+  notificationsSent  Int          @default(0)
+  failures           Int          @default(0)
+  status             ScrapeStatus @default(RUNNING)
+  errorLog           String?
+
+  @@index([status])
+  @@index([startedAt])
+}
