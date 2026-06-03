@@ -1,0 +1,12 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "Dockerfile"
+  },
+  "deploy": {
+    "startCommand": "sh scripts/worker-once.sh",
+    "cronSchedule": "0 6 * * *",
+    "restartPolicyType": "NEVER"
+  }
+}
