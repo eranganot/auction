@@ -1,0 +1,100 @@
+<!doctype html>
+<html dir="rtl" lang="he">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>מכרזי רכב — Bidspirit</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body { font-family: 'Segoe UI', Arial, sans-serif; }
+      th[data-sort] { cursor: pointer; user-select: none; }
+      th[data-sort]:hover { background-color: rgb(241 245 249); }
+    </style>
+  </head>
+  <body class="bg-slate-100 text-slate-800">
+    <div class="mx-auto max-w-7xl p-4">
+      <header class="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <h1 class="text-2xl font-bold text-slate-900">מכרזי רכב תואמים</h1>
+        <div id="status-strip" class="text-sm text-slate-600">טוען נתונים…</div>
+      </header>
+
+      <div class="grid grid-cols-1 gap-4 lg:grid-cols-4">
+        <!-- Sidebar: filter settings -->
+        <aside class="lg:col-span-1">
+          <form id="filter-form" class="rounded-xl bg-white p-4 shadow">
+            <h2 class="mb-3 text-lg font-semibold">הגדרות סינון</h2>
+
+            <label class="mb-2 block text-sm">
+              שנת מודל מינימלית
+              <input type="number" name="minModelYear" min="1900" max="2100"
+                class="mt-1 w-full rounded border border-slate-300 p-2" />
+            </label>
+
+            <label class="mb-2 block text-sm">
+              קילומטראז' מקסימלי
+              <input type="number" name="maxMileage" min="0"
+                class="mt-1 w-full rounded border border-slate-300 p-2" />
+            </label>
+
+            <label class="mb-2 block text-sm">
+              יד מקסימלית
+              <input type="number" name="maxHand" min="1" max="20"
+                class="mt-1 w-full rounded border border-slate-300 p-2" />
+            </label>
+
+            <label class="mb-2 block text-sm">
+              מחיר פתיחה מקסימלי (₪)
+              <input type="number" name="maxPrice" min="0"
+                class="mt-1 w-full rounded border border-slate-300 p-2" />
+            </label>
+
+            <fieldset class="mb-2">
+              <legend class="text-sm">תיבת הילוכים</legend>
+              <div id="transmission-options" class="mt-1 space-y-1 text-sm"></div>
+            </fieldset>
+
+            <fieldset class="mb-3">
+              <legend class="text-sm">בעלות</legend>
+              <div id="ownership-options" class="mt-1 space-y-1 text-sm"></div>
+            </fieldset>
+
+            <button type="submit"
+              class="w-full rounded bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700">
+              שמור והחל
+            </button>
+            <p id="filter-msg" class="mt-2 text-center text-sm"></p>
+          </form>
+        </aside>
+
+        <!-- Main: results table -->
+        <main class="lg:col-span-3">
+          <div class="overflow-x-auto rounded-xl bg-white shadow">
+            <table class="min-w-full text-right text-sm">
+              <thead class="bg-slate-50 text-slate-700">
+                <tr>
+                  <th class="p-2" data-sort="makeModel">יצרן ודגם</th>
+                  <th class="p-2" data-sort="modelYear">שנת מודל</th>
+                  <th class="p-2" data-sort="dateOnRoad">עליה לכביש</th>
+                  <th class="p-2" data-sort="mileage">קילומטראז'</th>
+                  <th class="p-2">תיבת הילוכים</th>
+                  <th class="p-2" data-sort="hand">יד</th>
+                  <th class="p-2">בעלות</th>
+                  <th class="p-2" data-sort="openingPrice">מחיר פתיחה</th>
+                  <th class="p-2" data-sort="tariffPrice">מחיר מחירון</th>
+                  <th class="p-2" data-sort="lastSeenAt">עודכן</th>
+                  <th class="p-2">קישור</th>
+                </tr>
+              </thead>
+              <tbody id="cars-body">
+                <tr><td colspan="11" class="p-6 text-center text-slate-400">טוען…</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p id="result-count" class="mt-2 text-sm text-slate-600"></p>
+        </main>
+      </div>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
