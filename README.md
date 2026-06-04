@@ -88,38 +88,41 @@ Other useful scripts: `npm run build` (compile all), `npm run lint`, `npm run fo
 reports itself "not configured" and is skipped, so the dashboard and a credential-less worker boot
 cleanly. See `.env.example` for a ready-to-copy template.
 
-| Variable              | Default          | Purpose                                                        |
-| --------------------- | ---------------- | -------------------------------------------------------------- |
-| `PORT`                | `3000`           | Dashboard HTTP port (Railway sets this automatically).         |
-| `DATABASE_URL`        | -                | **Required.** PostgreSQL connection string.                    |
-| `LOG_LEVEL`           | `info`           | `debug` / `info` / `warn` / `error`.                           |
-| `NODE_ENV`            | `development`    | Standard Node environment flag.                                |
-| `SCRAPER_HEADLESS`    | `true`           | Run the Playwright fallback browser headless.                  |
-| `SCRAPER_TIMEOUT`     | `30000`          | Per-request timeout (ms).                                      |
-| `SCRAPER_DELAY_MIN`   | `800`            | Min randomized delay between requests (ms).                    |
-| `SCRAPER_DELAY_MAX`   | `2500`           | Max randomized delay between requests (ms).                    |
-| `SCRAPER_MAX_RETRIES` | `3`              | Retry attempts per request.                                    |
-| `SCRAPER_CRON`        | `0 6 * * *`      | node-cron schedule (persistent worker mode only).              |
-| `SCRAPER_TZ`          | `Asia/Jerusalem` | Timezone for the cron schedule.                                |
-| `RUN_ONCE`            | `false`          | `true` -> worker runs one cycle and exits (cron-service mode). |
-| `BIDSPIRIT_REGION`    | `IL`             | Bidspirit region.                                              |
-| `BIDSPIRIT_CONTENT`   | `CARS`           | Content type to scrape.                                        |
-| `TELEGRAM_BOT_TOKEN`  | -                | Telegram bot token (enables Telegram notifications).           |
-| `TELEGRAM_CHAT_IDS`   | -                | Comma-separated chat IDs to notify.                            |
-| `SMTP_HOST`           | -                | SMTP server host (enables email notifications).                |
-| `SMTP_PORT`           | `587`            | SMTP port.                                                     |
-| `SMTP_USER`           | -                | SMTP username.                                                 |
-| `SMTP_PASS`           | -                | SMTP password.                                                 |
-| `SMTP_FROM`           | `SMTP_USER`      | From header for outgoing mail.                                 |
-| `NOTIFICATION_EMAILS` | -                | Comma-separated recipient list.                                |
+| Variable                    | Default          | Purpose                                                                |
+| --------------------------- | ---------------- | ---------------------------------------------------------------------- |
+| `PORT`                      | `3000`           | Dashboard HTTP port (Railway sets this automatically).                 |
+| `DATABASE_URL`              | -                | **Required.** PostgreSQL connection string.                            |
+| `LOG_LEVEL`                 | `info`           | `debug` / `info` / `warn` / `error`.                                   |
+| `NODE_ENV`                  | `development`    | Standard Node environment flag.                                        |
+| `SCRAPER_HEADLESS`          | `true`           | Run the Playwright fallback browser headless.                          |
+| `SCRAPER_TIMEOUT`           | `30000`          | Per-request timeout (ms).                                              |
+| `SCRAPER_DELAY_MIN`         | `800`            | Min randomized delay between requests (ms).                            |
+| `SCRAPER_DELAY_MAX`         | `2500`           | Max randomized delay between requests (ms).                            |
+| `SCRAPER_MAX_RETRIES`       | `3`              | Retry attempts per request.                                            |
+| `SCRAPER_CRON`              | `0 6 * * *`      | node-cron schedule (persistent worker mode only).                      |
+| `SCRAPER_TZ`                | `Asia/Jerusalem` | Timezone for the cron schedule.                                        |
+| `RUN_ONCE`                  | `false`          | `true` -> worker runs one cycle and exits (Railway cron-service mode). |
+| `RUN_ON_START`              | `false`          | Persistent worker: also run one cycle immediately on boot.             |
+| `SCRAPER_STALE_RUN_MINUTES` | `120`            | Age after which a stuck `RUNNING` scrape is reaped (crash recovery).   |
+| `BIDSPIRIT_REGION`          | `IL`             | Bidspirit region.                                                      |
+| `BIDSPIRIT_CONTENT`         | `CARS`           | Content type to scrape.                                                |
+| `TELEGRAM_BOT_TOKEN`        | -                | Telegram bot token (enables Telegram notifications).                   |
+| `TELEGRAM_CHAT_IDS`         | -                | Comma-separated chat IDs to notify.                                    |
+| `SMTP_HOST`                 | -                | SMTP server host (enables email notifications).                        |
+| `SMTP_PORT`                 | `587`            | SMTP port.                                                             |
+| `SMTP_USER`                 | -                | SMTP username.                                                         |
+| `SMTP_PASS`                 | -                | SMTP password.                                                         |
+| `SMTP_FROM`                 | `SMTP_USER`      | From header for outgoing mail.                                         |
+| `NOTIFICATION_EMAILS`       | -                | Comma-separated recipient list.                                        |
 
 ---
 
 ## Railway deployment
 
 The repo ships a `Dockerfile` (based on the official Playwright image) and two config-as-code
-files. The dashboard runs as a persistent service; the scraper runs as a daily **cron** service.
-Both build from the same image - only the start command differs.
+files. The dashboard and the worker both run as **persistent services** off the same image - only the
+start command differs. The worker schedules itself internally with node-cron (Railway's native
+cron scheduler proved unreliable for this project).
 
 1. **Create the project and add Postgres.** In Railway, create a new project from the
    `eranganot/auction` GitHub repo, then **+ New -> Database -> PostgreSQL**. Railway exposes the
@@ -133,14 +136,14 @@ Both build from the same image - only the start command differs.
    - Set `DATABASE_URL` (reference the Postgres plugin) and any notification vars you want.
    - Railway provides `PORT` automatically.
 
-3. **Worker cron service** (one-shot, daily).
+3. **Worker service** (persistent, self-scheduling).
    - Add a second service from the same repo.
-   - Point its config-as-code path at **`railway.worker.json`**, which runs
-     `sh scripts/worker-once.sh` on a `cronSchedule` of `0 6 * * *` (06:00 daily) with
-     restart policy `NEVER` (a cron run is expected to exit).
-   - Set the same `DATABASE_URL` and notification vars.
-   - `RUN_ONCE=true` is implied by the `worker:once` script, so the process runs one scrape cycle
-     and exits cleanly.
+   - Point its config-as-code path at **`railway.worker.json`**, which builds the Dockerfile and
+     runs `sh scripts/start-worker.sh` (restart policy `ON_FAILURE`).
+   - Set the same `DATABASE_URL` and notification vars, plus `RUN_ON_START=true` so a fresh deploy
+     scrapes immediately instead of waiting for the next scheduled tick.
+   - The worker stays alive and runs `SCRAPER_CRON` (default `0 6 * * *`, `SCRAPER_TZ`
+     `Asia/Jerusalem`) via node-cron.
 
 4. **Seed the default filter** once, after the first deploy (see below).
 
@@ -158,11 +161,13 @@ Locally, use `npm run db:migrate` (creates/edits migrations in dev) and `npm run
 
 ### Cron configuration
 
-The daily schedule is defined in `railway.worker.json` (`"cronSchedule": "0 6 * * *"`). Change the
-cron expression there to adjust cadence. **Alternative - persistent worker:** instead of the cron
-service, you can run an always-on worker that schedules itself internally: set the service start
-command to `sh scripts/start-worker.sh`, leave `RUN_ONCE` unset/`false`, and control timing with
-`SCRAPER_CRON` and `SCRAPER_TZ`.
+The worker runs as an always-on service that schedules itself with node-cron: set the start command
+to `sh scripts/start-worker.sh`, leave `RUN_ONCE` unset/`false`, set `RUN_ON_START=true`, and
+control timing with `SCRAPER_CRON` (default `0 6 * * *`) and `SCRAPER_TZ` (`Asia/Jerusalem`). A
+stuck `RUNNING` row is auto-reaped after `SCRAPER_STALE_RUN_MINUTES` (default 120) so a crashed run
+can never hold the lock forever. **Alternative - Railway cron service:** point the service at a
+config that sets `cronSchedule` and `sh scripts/worker-once.sh` with `RUN_ONCE=true` (one cycle then
+exit); note Railway's cron scheduler was unreliable in testing.
 
 ---
 
