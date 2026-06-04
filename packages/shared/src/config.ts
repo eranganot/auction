@@ -46,6 +46,12 @@ const ConfigSchema = z.object({
     .string()
     .optional()
     .transform((v) => v === 'true'),
+  // In persistent scheduled mode, also run a single cycle immediately on boot
+  // (so a fresh deploy populates the DB without waiting for the next cron tick).
+  RUN_ON_START: z
+    .string()
+    .optional()
+    .transform((v) => v === 'true'),
 
   // Bidspirit
   BIDSPIRIT_REGION: z.string().default('IL'),
@@ -80,6 +86,7 @@ export interface AppConfig {
     timezone: string;
     maxRetries: number;
     runOnce: boolean;
+    runOnStart: boolean;
   };
   bidspirit: {
     region: string;
@@ -131,6 +138,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
       timezone: c.SCRAPER_TZ,
       maxRetries: c.SCRAPER_MAX_RETRIES,
       runOnce: c.RUN_ONCE,
+      runOnStart: c.RUN_ON_START,
     },
     bidspirit: {
       region: c.BIDSPIRIT_REGION,

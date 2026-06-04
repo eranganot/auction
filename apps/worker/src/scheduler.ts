@@ -21,7 +21,20 @@ export async function start(config: AppConfig, logger: Logger): Promise<void> {
   logger.info('worker: scheduled mode', {
     cron: config.scraper.cron,
     timezone: config.scraper.timezone,
+    runOnStart: config.scraper.runOnStart,
   });
+
+  // Optionally run a single cycle immediately on boot so a fresh deploy
+  // populates the DB without waiting for the next scheduled tick.
+  if (config.scraper.runOnStart) {
+    try {
+      logger.info('run-on-start: initial cycle');
+      const summary = await runOnce(config, logger);
+      logger.info('run-on-start finished', { ...summary });
+    } catch (err) {
+      logger.error('run-on-start threw', { error: (err as Error).message });
+    }
+  }
 
   cron.schedule(
     config.scraper.cron,
