@@ -5,8 +5,8 @@
     "dockerfilePath": "Dockerfile"
   },
   "deploy": {
-    "startCommand": "sh scripts/worker-once.sh",
-    "cronSchedule": "0 6 * * *",
-    "restartPolicyType": "NEVER"
+    "startCommand": "sh scripts/start-worker.sh",
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 3
   }
 }
