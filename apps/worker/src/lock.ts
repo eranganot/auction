@@ -11,8 +11,11 @@ export const STALE_RUN_MS = 2 * 60 * 60 * 1000; // 2 hours
  * to start a new run. Returns the ScrapeRun on success, or null if another run
  * is genuinely in progress (overlapping execution prevented).
  */
-export async function acquireRunLock(logger: Logger): Promise<ScrapeRun | null> {
-  const reaped = await reapStaleRuns(STALE_RUN_MS);
+export async function acquireRunLock(
+  logger: Logger,
+  staleMs: number = STALE_RUN_MS,
+): Promise<ScrapeRun | null> {
+  const reaped = await reapStaleRuns(staleMs);
   if (reaped > 0) logger.warn('reaped stale scrape runs', { reaped });
 
   const run = await tryStartScrapeRun();

@@ -42,6 +42,8 @@ const ConfigSchema = z.object({
   SCRAPER_CRON: z.string().default('0 6 * * *'),
   SCRAPER_TZ: z.string().default('Asia/Jerusalem'),
   SCRAPER_MAX_RETRIES: intWithDefault(3),
+  // Minutes after which a RUNNING scrape row is treated as crashed and reaped.
+  SCRAPER_STALE_RUN_MINUTES: intWithDefault(120),
   RUN_ONCE: z
     .string()
     .optional()
@@ -87,6 +89,7 @@ export interface AppConfig {
     maxRetries: number;
     runOnce: boolean;
     runOnStart: boolean;
+    staleRunMs: number;
   };
   bidspirit: {
     region: string;
@@ -139,6 +142,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
       maxRetries: c.SCRAPER_MAX_RETRIES,
       runOnce: c.RUN_ONCE,
       runOnStart: c.RUN_ON_START,
+      staleRunMs: c.SCRAPER_STALE_RUN_MINUTES * 60_000,
     },
     bidspirit: {
       region: c.BIDSPIRIT_REGION,

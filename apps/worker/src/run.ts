@@ -25,7 +25,7 @@ export interface RunSummary {
  * Per-catalog failures are isolated so one bad catalog never aborts the run.
  */
 export async function runOnce(config: AppConfig, logger: Logger): Promise<RunSummary> {
-  const run = await acquireRunLock(logger);
+  const run = await acquireRunLock(logger, config.scraper.staleRunMs);
   if (!run) return { ran: false, catalogs: 0, cars: 0, matched: 0, notified: 0, failures: 0 };
 
   const http = new HttpClient({
