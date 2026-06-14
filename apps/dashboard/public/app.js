@@ -171,4 +171,128 @@ document.addEventListener('DOMContentLoaded', () => {
   loadFilter();
   loadCars();
   loadStatus();
+  loadChanges();
+  initPush();
 });
+
+// ---------------------------------------------------------------------------
+// Daily changes panel
+// ---------------------------------------------------------------------------
+const CHANGE_REASON = {
+  AUCTION_ENDED: 'המכירה הסתיימה',
+  NOT_SEEN: 'הוסר מהרשימה',
+  NO_LONGER_MATCHES: 'כבר לא תואם',
+};
+
+async function loadChanges() {
+  const box = document.getElementById('changes-list');
+  if (!box) return;
+  try {
+    const res = await fetch('/api/changes?limit=50');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    renderChanges(json.changes);
+  } catch (err) {
+    box.innerHTML = '<p class="text-red-500">שגיאה בטעינת השינויים</p>';
+  }
+}
+
+function renderChanges(changes) {
+  const box = document.getElementById('changes-list');
+  if (!changes || changes.length === 0) {
+    box.innerHTML = '<p class="text-slate-400">אין שינויים אחרונים</p>';
+    return;
+  }
+  // Group by day (he-IL date).
+  const groups = {};
+  for (const c of changes) {
+    const day = new Date(c.detectedAt).toLocaleDateString('he-IL');
+    (groups[day] = groups[day] || []).push(c);
+  }
+  box.innerHTML = Object.entries(groups)
+    .map(([day, items]) => {
+      const rows = items
+        .map((c) => {
+          const isNew = c.type === 'NEW';
+          const badge = isNew
+            ? '<span class="rounded bg-green-100 px-1.5 text-green-700">חדש</span>'
+            : '<span class="rounded bg-red-100 px-1.5 text-red-700">הוסר</span>';
+          const reason = !isNew && c.reason ? ` · ${CHANGE_REASON[c.reason] || ''}` : '';
+          return `<div class="flex items-start gap-2">
+            ${badge}
+            <a class="text-blue-600 hover:underline" href="${c.lotUrl}" target="_blank" rel="noopener">${c.makeModel || '—'}</a>
+            <span class="text-slate-400">${reason}</span>
+          </div>`;
+        })
+        .join('');
+      return `<div><div class="mb-1 font-semibold text-slate-500">${day}</div>${rows}</div>`;
+    })
+    .join('');
+}
+
+// ---------------------------------------------------------------------------
+// Web push subscription
+// ---------------------------------------------------------------------------
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw = atob(base64);
+  const out = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+  return out;
+}
+
+async function initPush() {
+  const btn = document.getElementById('enable-push');
+  if (!btn) return;
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+
+  let vapid;
+  try {
+    const res = await fetch('/api/push/vapid');
+    vapid = await res.json();
+  } catch (_e) {
+    return;
+  }
+  if (!vapid || !vapid.enabled || !vapid.publicKey) return; // push not configured server-side
+  if (Notification.permission === 'denied') return;
+
+  // Already subscribed? Keep the button hidden.
+  try {
+    const reg = await navigator.serviceWorker.getRegistration();
+    const existing = reg && (await reg.pushManager.getSubscription());
+    if (existing) return;
+  } catch (_e) {
+    /* ignore */
+  }
+
+  btn.classList.remove('hidden');
+  btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    try {
+      const reg = await navigator.serviceWorker.register('/sw.js');
+      const perm = await Notification.requestPermission();
+      if (perm !== 'granted') {
+        btn.disabled = false;
+        return;
+      }
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(vapid.publicKey),
+      });
+      const res = await fetch('/api/push/subscribe', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(sub),
+      });
+      if (res.ok) {
+        btn.textContent = '✓ התראות מופעלות';
+        setTimeout(() => btn.classList.add('hidden'), 2500);
+      } else {
+        btn.disabled = false;
+      }
+    } catch (_e) {
+      btn.disabled = false;
+    }
+  });
+}

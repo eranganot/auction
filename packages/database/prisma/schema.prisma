@@ -44,6 +44,7 @@ enum AuctionStatus {
 enum NotificationChannel {
   TELEGRAM
   EMAIL
+  WEBPUSH
 }
 
 enum NotificationStatus {
@@ -56,6 +57,11 @@ enum ScrapeStatus {
   RUNNING
   SUCCESS
   FAILED
+}
+
+enum ChangeType {
+  NEW
+  REMOVED
 }
 
 // ---------------------------------------------------------------------------
@@ -114,6 +120,10 @@ model Car {
   lastStatus         String?
   notificationSentAt DateTime?
 
+  // Daily-change tracking: current membership in the active-filter match set.
+  isMatch             Boolean   @default(false)
+  matchStateChangedAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -121,6 +131,7 @@ model Car {
   auction   Auction @relation(fields: [auctionId], references: [id], onDelete: Cascade)
 
   notifications Notification[]
+  changeEvents  ChangeEvent[]
 
   @@unique([auctionId, lotId])
   @@index([modelYear])
@@ -129,6 +140,7 @@ model Car {
   @@index([transmission])
   @@index([lastStatus])
   @@index([notificationSentAt])
+  @@index([isMatch])
   @@index([auctionId])
 }
 
@@ -197,4 +209,40 @@ model ScrapeRun {
 
   @@index([status])
   @@index([startedAt])
+}
+
+// ---------------------------------------------------------------------------
+// ChangeEvent — daily diff of the match set (a car entered or left it).
+// Powers the daily digest (Telegram/Email/web push) and the in-app panel.
+// ---------------------------------------------------------------------------
+
+model ChangeEvent {
+  id         Int        @id @default(autoincrement())
+  carId      Int
+  car        Car        @relation(fields: [carId], references: [id], onDelete: Cascade)
+  type       ChangeType
+  // Denormalized snapshot so the digest/panel render even if the car changes.
+  makeModel  String
+  lotUrl     String
+  reason     String? // e.g. AUCTION_ENDED, NOT_SEEN, NO_LONGER_MATCHES
+  runId      Int? // ScrapeRun that detected it (no FK; observability only)
+  detectedAt DateTime   @default(now())
+
+  @@index([detectedAt])
+  @@index([type])
+  @@index([carId])
+}
+
+// ---------------------------------------------------------------------------
+// PushSubscription — a browser Web Push endpoint (one row per device/browser).
+// ---------------------------------------------------------------------------
+
+model PushSubscription {
+  id        Int      @id @default(autoincrement())
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userAgent String?
+  createdAt DateTime @default(now())
+  lastUsedAt DateTime @default(now())
 }

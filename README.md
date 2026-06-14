@@ -3,8 +3,8 @@
 Automated monitor for car auctions on **[Bidspirit Cars](https://cars.bidspirit.com/ui/home/?lang=he)** (Israel).
 It discovers active and upcoming car-auction catalogs, scrapes every lot, normalizes and stores
 the data in PostgreSQL, matches lots against your configurable preferences, shows matches in a
-sortable Hebrew (RTL) dashboard, and sends **Telegram + Email** notifications the first time a new
-lot matches your filter. It runs automatically once per day.
+sortable Hebrew (RTL) dashboard, and sends a **daily change digest** (new + removed matches) over
+**Telegram, Email, an in-app panel, and web push**. It runs automatically once per day.
 
 > The application UI is in **Hebrew**. This README is in English.
 
@@ -183,6 +183,37 @@ a "maybe" than hide it. An empty enum array (transmission/ownership) means "no c
 
 Notifications fire **only** when a lot newly matches **and** has never been notified before, so you
 never get duplicate alerts for the same lot.
+
+---
+
+## Daily change notifications
+
+Each daily run diffs the current match set against the previous run and records the transitions:
+
+- **NEW** - a car that now satisfies the active filter and is still active (its auction has not
+  ENDED and the lot was seen in this run).
+- **REMOVED** - a car that was previously matching but left the list, with a reason:
+  `AUCTION_ENDED`, `NOT_SEEN` (lot disappeared), or `NO_LONGER_MATCHES`.
+
+A digest is sent **only when something changed** (quiet days produce no message). It is delivered on
+every configured channel:
+
+- **Telegram + Email** - the existing channels; the digest lists new and removed cars in Hebrew.
+- **In-app panel** - the dashboard shows a "שינויים יומיים" panel (served from `GET /api/changes`),
+  grouped by day with NEW/REMOVED badges.
+- **Web push** - browser notifications via the Web Push API. Click **🔔 הפעל התראות דפדפן** in the
+  dashboard header to subscribe. Requires VAPID keys (below); disabled until they are set.
+
+Change membership is tracked on `Car.isMatch`, and each transition is persisted as a `ChangeEvent`
+row, so the diff is idempotent and never double-fires.
+
+### Web push setup (VAPID)
+
+1. Generate a keypair once: `npx web-push generate-vapid-keys`.
+2. Set `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, and `VAPID_SUBJECT` (a `mailto:` or URL) on **both**
+   the dashboard and worker services. The dashboard exposes the public key at `GET /api/push/vapid`;
+   the worker uses the private key to send. Browser subscriptions are stored in `PushSubscription`
+   and dead endpoints are pruned automatically on 404/410.
 
 ---
 

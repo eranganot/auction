@@ -9,6 +9,8 @@ export * from './repositories/cars';
 export * from './repositories/filters';
 export * from './repositories/notifications';
 export * from './repositories/runs';
+export * from './repositories/changes';
+export * from './repositories/push';
 
 // Re-export Prisma enums as runtime values.
 export {
@@ -18,7 +20,17 @@ export {
   NotificationChannel,
   NotificationStatus,
   ScrapeStatus,
+  ChangeType,
 } from '@prisma/client';
 
 // Re-export Prisma model row types (type-only).
-export type { Auction, Car, UserFilter, Notification, ScrapeRun, Prisma } from '@prisma/client';
+export type {
+  Auction,
+  Car,
+  UserFilter,
+  Notification,
+  ScrapeRun,
+  ChangeEvent,
+  PushSubscription,
+  Prisma,
+} from '@prisma/client';

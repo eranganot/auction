@@ -14,10 +14,12 @@
     "@bidspirit/database": "1.0.0",
     "@bidspirit/shared": "1.0.0",
     "node-cron": "^3.0.3",
-    "playwright": "^1.45.0"
+    "playwright": "^1.45.0",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@types/node-cron": "^3.0.11",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "@types/web-push": "^3.6.4"
   }
 }

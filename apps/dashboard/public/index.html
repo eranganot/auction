@@ -15,7 +15,13 @@
     <div class="mx-auto max-w-7xl p-4">
       <header class="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h1 class="text-2xl font-bold text-slate-900">מכרזי רכב תואמים</h1>
-        <div id="status-strip" class="text-sm text-slate-600">טוען נתונים…</div>
+        <div class="flex items-center gap-3">
+          <div id="status-strip" class="text-sm text-slate-600">טוען נתונים…</div>
+          <button id="enable-push" type="button" title="קבלת התראות דפדפן על שינויים יומיים"
+            class="hidden rounded bg-amber-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-amber-600">
+            🔔 הפעל התראות דפדפן
+          </button>
+        </div>
       </header>
 
       <div class="grid grid-cols-1 gap-4 lg:grid-cols-4">
@@ -64,6 +70,13 @@
             </button>
             <p id="filter-msg" class="mt-2 text-center text-sm"></p>
           </form>
+
+          <section class="mt-4 rounded-xl bg-white p-4 shadow">
+            <h2 class="mb-3 text-lg font-semibold">שינויים יומיים</h2>
+            <div id="changes-list" class="space-y-2 text-sm text-slate-700">
+              <p class="text-slate-400">טוען…</p>
+            </div>
+          </section>
         </aside>
 
         <!-- Main: results table -->

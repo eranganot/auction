@@ -1,11 +1,11 @@
 import { disconnect, finishScrapeRun } from '@bidspirit/database';
-import { buildNotifiers } from '@bidspirit/shared';
 import type { AppConfig, Logger } from '@bidspirit/shared';
 import { HttpClient, randomDelay, sleep } from './httpClient';
 import { discoverAuctions } from './discovery';
 import { extractLots } from './extract';
 import { persistCatalog } from './pipeline';
-import { notifyNewMatches } from './notifyMatches';
+import { notifyDailyChanges } from './notifyMatches';
+import { buildWorkerNotifiers } from './notifiers';
 import { acquireRunLock } from './lock';
 import { captureFailure } from './failure';
 
@@ -73,8 +73,14 @@ export async function runOnce(config: AppConfig, logger: Logger): Promise<RunSum
       await sleep(randomDelay(config.scraper.delayMinMs, config.scraper.delayMaxMs));
     }
 
-    const notifiers = buildNotifiers(config);
-    const { matched, notified } = await notifyNewMatches({ notifiers, logger });
+    const notifiers = buildWorkerNotifiers(config);
+    const { matched, added, removed, notified } = await notifyDailyChanges({
+      notifiers,
+      logger,
+      runId: run.id,
+      runStartedAt: run.startedAt,
+    });
+    logger.info('daily changes', { added, removed, notified });
 
     await finishScrapeRun(run.id, failures > 0 && catalogs === 0 ? 'FAILED' : 'SUCCESS', {
       catalogsProcessed: catalogs,

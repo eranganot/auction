@@ -1,10 +1,14 @@
 import {
   countCars,
   countNotifications,
+  countPushSubscriptions,
   findCars,
   getActiveFilter,
   getLatestRun,
+  listPushSubscriptions,
+  listRecentChanges,
   listRecentRuns,
+  savePushSubscription,
   updateActiveFilter,
 } from '@bidspirit/database';
 
@@ -21,6 +25,10 @@ export interface Store {
   listRecentRuns: typeof listRecentRuns;
   countNotifications: typeof countNotifications;
   countCars: typeof countCars;
+  listRecentChanges: typeof listRecentChanges;
+  savePushSubscription: typeof savePushSubscription;
+  listPushSubscriptions: typeof listPushSubscriptions;
+  countPushSubscriptions: typeof countPushSubscriptions;
 }
 
 export const defaultStore: Store = {
@@ -31,4 +39,8 @@ export const defaultStore: Store = {
   listRecentRuns,
   countNotifications,
   countCars,
+  listRecentChanges,
+  savePushSubscription,
+  listPushSubscriptions,
+  countPushSubscriptions,
 };

@@ -1,5 +1,5 @@
-import { buildTelegramMessage } from './format';
-import type { NotifiableCar, Notifier, NotifyResult } from './types';
+import { buildTelegramDigest, buildTelegramMessage } from './format';
+import type { DigestPayload, NotifiableCar, Notifier, NotifyResult } from './types';
 
 export interface TelegramConfig {
   botToken: string | undefined;
@@ -79,6 +79,59 @@ export class TelegramNotifier implements Notifier {
       ok: true,
       skipped: false,
       detail: `Sent ${cars.length} cars to ${this.chatIds.length} chat(s)`,
+    };
+  }
+
+  public async notifyDigest(digest: DigestPayload): Promise<NotifyResult> {
+    if (!this.isEnabled()) {
+      return { channel: this.channel, ok: false, skipped: true, detail: 'Telegram not configured' };
+    }
+    if (digest.added.length === 0 && digest.removed.length === 0) {
+      return { channel: this.channel, ok: true, skipped: true, detail: 'No changes' };
+    }
+    return this.sendText(
+      buildTelegramDigest(digest),
+      `${digest.added.length} new / ${digest.removed.length} removed`,
+    );
+  }
+
+  private async sendText(text: string, detailLabel: string): Promise<NotifyResult> {
+    const url = `${this.apiBase}/bot${this.token}/sendMessage`;
+    const failures: string[] = [];
+    for (const chatId of this.chatIds) {
+      try {
+        const res = await this.fetchImpl(url, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text,
+            parse_mode: 'HTML',
+            disable_web_page_preview: true,
+          }),
+        });
+        if (!res.ok) {
+          const body = await safeText(res);
+          failures.push(`chat ${chatId}: HTTP ${res.status} ${body}`);
+        }
+      } catch (err) {
+        failures.push(`chat ${chatId}: ${(err as Error).message}`);
+      }
+    }
+    if (failures.length > 0) {
+      return {
+        channel: this.channel,
+        ok: false,
+        skipped: false,
+        detail: `Sent to ${this.chatIds.length - failures.length}/${this.chatIds.length} chats`,
+        error: failures.join('; '),
+      };
+    }
+    return {
+      channel: this.channel,
+      ok: true,
+      skipped: false,
+      detail: `Sent ${detailLabel} to ${this.chatIds.length} chat(s)`,
     };
   }
 }

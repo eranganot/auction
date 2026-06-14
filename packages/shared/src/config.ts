@@ -70,6 +70,11 @@ const ConfigSchema = z.object({
   SMTP_PASS: z.string().optional(),
   SMTP_FROM: z.string().optional(),
   NOTIFICATION_EMAILS: z.string().optional(),
+
+  // Web Push (VAPID) — optional; web push is disabled unless both keys are set.
+  VAPID_PUBLIC_KEY: z.string().optional(),
+  VAPID_PRIVATE_KEY: z.string().optional(),
+  VAPID_SUBJECT: z.string().default('mailto:admin@bidspirit.local'),
 });
 
 export type RawConfig = z.infer<typeof ConfigSchema>;
@@ -107,6 +112,12 @@ export interface AppConfig {
     pass: string | undefined;
     from: string | undefined;
     recipients: string[];
+    enabled: boolean;
+  };
+  webpush: {
+    publicKey: string | undefined;
+    privateKey: string | undefined;
+    subject: string;
     enabled: boolean;
   };
 }
@@ -161,6 +172,12 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
       from: c.SMTP_FROM ?? c.SMTP_USER,
       recipients,
       enabled: Boolean(c.SMTP_HOST && recipients.length > 0),
+    },
+    webpush: {
+      publicKey: c.VAPID_PUBLIC_KEY,
+      privateKey: c.VAPID_PRIVATE_KEY,
+      subject: c.VAPID_SUBJECT,
+      enabled: Boolean(c.VAPID_PUBLIC_KEY && c.VAPID_PRIVATE_KEY),
     },
   };
 }

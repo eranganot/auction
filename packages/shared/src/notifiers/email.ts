@@ -1,6 +1,11 @@
 import nodemailer, { type Transporter } from 'nodemailer';
-import { buildEmailHtml, buildEmailSubject } from './format';
-import type { NotifiableCar, Notifier, NotifyResult } from './types';
+import {
+  buildDigestEmailHtml,
+  buildDigestEmailSubject,
+  buildEmailHtml,
+  buildEmailSubject,
+} from './format';
+import type { DigestPayload, NotifiableCar, Notifier, NotifyResult } from './types';
 
 export interface EmailConfig {
   host: string | undefined;
@@ -69,6 +74,37 @@ export class EmailNotifier implements Notifier {
         ok: false,
         skipped: false,
         detail: 'Email send failed',
+        error: (err as Error).message,
+      };
+    }
+  }
+
+  public async notifyDigest(digest: DigestPayload): Promise<NotifyResult> {
+    if (!this.isEnabled()) {
+      return { channel: this.channel, ok: false, skipped: true, detail: 'Email not configured' };
+    }
+    if (digest.added.length === 0 && digest.removed.length === 0) {
+      return { channel: this.channel, ok: true, skipped: true, detail: 'No changes' };
+    }
+    try {
+      await this.getTransporter().sendMail({
+        from: this.cfg.from ?? this.cfg.user,
+        to: this.cfg.recipients.join(', '),
+        subject: buildDigestEmailSubject(digest),
+        html: buildDigestEmailHtml(digest),
+      });
+      return {
+        channel: this.channel,
+        ok: true,
+        skipped: false,
+        detail: `Emailed digest (+${digest.added.length}/-${digest.removed.length}) to ${this.cfg.recipients.length} recipient(s)`,
+      };
+    } catch (err) {
+      return {
+        channel: this.channel,
+        ok: false,
+        skipped: false,
+        detail: 'Email digest send failed',
         error: (err as Error).message,
       };
     }
