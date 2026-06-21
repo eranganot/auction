@@ -184,6 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadStatus();
   loadChanges();
   initPush();
+  initPwa();
 });
 
 // ---------------------------------------------------------------------------
@@ -305,5 +306,39 @@ async function initPush() {
     } catch (_e) {
       btn.disabled = false;
     }
+  });
+}
+
+// ---------------------------------------------------------------------------
+// PWA: register the service worker + handle the "Install app" button
+// ---------------------------------------------------------------------------
+function initPwa() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  }
+  let deferredPrompt = null;
+  const btn = document.getElementById('install-app');
+  window.addEventListener('beforeinstallprompt', (e) => {
+    // Chrome fires this when the app is installable; capture it for our button.
+    e.preventDefault();
+    deferredPrompt = e;
+    if (btn) btn.classList.remove('hidden');
+  });
+  if (btn) {
+    btn.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      btn.disabled = true;
+      deferredPrompt.prompt();
+      try {
+        await deferredPrompt.userChoice;
+      } catch (_e) {
+        /* ignore */
+      }
+      deferredPrompt = null;
+      btn.classList.add('hidden');
+    });
+  }
+  window.addEventListener('appinstalled', () => {
+    if (btn) btn.classList.add('hidden');
   });
 }

@@ -30,3 +30,21 @@ coverage/
 # playwright
 /test-results/
 /playwright-report/
+
+# Capacitor / Android native shell
+/android/.gradle/
+/android/build/
+/android/app/build/
+/android/capacitor-cordova-android-plugins/build/
+/android/local.properties
+/android/app/release/
+/android/app/debug/
+*.keystore
+!android/app/build/.npmkeep
+
+# keep native-shell images even though *.png is ignored above
+!android/**/*.png
+!assets/**/*.png
+
+# keep PWA icons (served to the browser) even though *.png is ignored above
+!apps/dashboard/public/**/*.png
