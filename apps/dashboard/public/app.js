@@ -41,8 +41,12 @@ function sortParam() {
 
 async function loadCars() {
   const body = document.getElementById('cars-body');
+  const showInactive = document.getElementById('show-inactive');
+  const inactiveParam = showInactive && showInactive.checked ? '&includeInactive=1' : '';
   try {
-    const res = await fetch(`/api/cars?sort=${encodeURIComponent(sortParam())}&pageSize=200`);
+    const res = await fetch(
+      `/api/cars?sort=${encodeURIComponent(sortParam())}&pageSize=200${inactiveParam}`,
+    );
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const json = await res.json();
     renderCars(json.data);
@@ -168,6 +172,8 @@ document.addEventListener('DOMContentLoaded', () => {
   buildCheckboxes('ownership-options', OWNERSHIP, 'ownership');
   document.getElementById('filter-form').addEventListener('submit', submitFilter);
   wireSorting();
+  const showInactive = document.getElementById('show-inactive');
+  if (showInactive) showInactive.addEventListener('change', loadCars);
   loadFilter();
   loadCars();
   loadStatus();

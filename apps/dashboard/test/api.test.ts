@@ -178,3 +178,43 @@ describe('GET /api/status', () => {
     expect(res.body.totals).toEqual({ cars: 40, notifications: 3 });
   });
 });
+
+describe('GET /api/cars — past/completed auctions excluded', () => {
+  const T = new Date('2026-06-14T10:00:00Z'); // last successful run start
+  const runs = [{ status: 'SUCCESS', startedAt: T }] as unknown as ScrapeRun[];
+
+  function storeWithStale() {
+    return fakeStore({
+      listRecentRuns: async () => runs,
+      findCars: async () =>
+        [
+          mkCar({ id: 1, lotUrl: 'https://x/1', lastSeenAt: new Date('2026-06-14T10:05:00Z') }), // seen this run → current
+          mkCar({ id: 2, lotUrl: 'https://x/2', lastSeenAt: new Date('2026-06-10T10:00:00Z') }), // stale → excluded
+          mkCar({
+            id: 3,
+            lotUrl: 'https://x/3',
+            lastSeenAt: new Date('2026-06-14T10:05:00Z'),
+            auction: { externalId: 'a', title: 'c', status: 'ENDED' },
+          }), // ended → excluded
+        ] as CarWithAuction[],
+    });
+  }
+
+  it('hides stale and ended cars by default', async () => {
+    const res = await request(app(storeWithStale())).get('/api/cars');
+    expect(res.status).toBe(200);
+    expect(res.body.total).toBe(1);
+    expect(res.body.data[0].lotUrl).toBe('https://x/1');
+  });
+
+  it('includes them when includeInactive=1', async () => {
+    const res = await request(app(storeWithStale())).get('/api/cars?includeInactive=1');
+    expect(res.body.total).toBe(3);
+  });
+
+  it('shows everything when there is no successful run yet (cannot tell)', async () => {
+    const res = await request(app(fakeStore({ listRecentRuns: async () => [] }))).get('/api/cars');
+    // default 3 fixtures: 1 matches filter (others fail year/gear), none excluded as stale
+    expect(res.body.total).toBe(1);
+  });
+});
