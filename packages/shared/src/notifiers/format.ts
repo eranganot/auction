@@ -184,19 +184,53 @@ export function buildDigestEmailHtml(digest: DigestPayload): string {
 </html>`;
 }
 
-/** Compact JSON-able payload for a Web Push notification. */
+/** Short car label for a notification line: "Make Model (Year)". */
+function carLabelHe(car: NotifiableCar): string {
+  return car.modelYear ? `${car.makeModel} (${car.modelYear})` : car.makeModel;
+}
+
+/**
+ * Compact JSON-able payload for a Web Push notification.
+ *
+ * Focused on what's new: the title states HOW MANY cars were added and the body
+ * lists WHICH ones (make/model + year), capped so the notification stays short.
+ * When a run has no new cars, it falls back to a removed/summary message.
+ */
 export function buildWebPushPayload(digest: DigestPayload): {
   title: string;
   body: string;
   url: string;
 } {
-  const bits: string[] = [];
-  if (digest.added.length) bits.push(`+${digest.added.length} חדשים`);
-  if (digest.removed.length) bits.push(`−${digest.removed.length} הוסרו`);
-  const firstUrl = digest.added[0]?.lotUrl ?? digest.removed[0]?.lotUrl ?? '/';
+  const added = digest.added;
+
+  if (added.length > 0) {
+    const n = added.length;
+    const title =
+      n === 1 ? '🚗 רכב חדש תואם נוסף לרשימה' : `🚗 ${n} רכבים חדשים תואמים נוספו לרשימה`;
+
+    // List the new cars by name; cap the list so the body doesn't overflow.
+    const MAX_NAMES = 8;
+    const names = added.slice(0, MAX_NAMES).map(carLabelHe);
+    const rest = n - names.length;
+    let body = names.join(', ');
+    if (rest > 0) body += ` ועוד ${rest}`;
+
+    // One new car -> deep-link to it; several -> open the list (changes panel).
+    const url = n === 1 ? (added[0]?.lotUrl ?? '/') : '/';
+    return { title, body, url };
+  }
+
+  if (digest.removed.length > 0) {
+    return {
+      title: '🔔 שינויים ברשימת ההתאמות',
+      body: `−${digest.removed.length} הוסרו · סה״כ ${digest.totalMatches} תואמים`,
+      url: '/',
+    };
+  }
+
   return {
     title: '🔔 שינויים יומיים ברכבים',
-    body: `${bits.join(' · ')} · סה״כ ${digest.totalMatches} תואמים`,
-    url: firstUrl,
+    body: `סה״כ ${digest.totalMatches} רכבים תואמים`,
+    url: '/',
   };
 }
