@@ -21,6 +21,8 @@ export interface CarDTO {
   lastSeenAt: string;
   auctionTitle: string;
   auctionStatus: string;
+  auctionStartsAt: string | null;
+  auctionEndsAt: string | null;
 }
 
 export function toCarDTO(car: CarWithAuction): CarDTO {
@@ -44,5 +46,7 @@ export function toCarDTO(car: CarWithAuction): CarDTO {
     lastSeenAt: car.lastSeenAt.toISOString(),
     auctionTitle: car.auction?.title ?? '',
     auctionStatus: car.auction?.status ?? '',
+    auctionStartsAt: car.auction?.startsAt ? car.auction.startsAt.toISOString() : null,
+    auctionEndsAt: car.auction?.endsAt ? car.auction.endsAt.toISOString() : null,
   };
 }

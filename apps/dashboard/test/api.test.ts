@@ -52,7 +52,13 @@ function mkCar(over: Partial<CarWithAuction>): CarWithAuction {
     lastSeenAt: new Date(),
     notificationSentAt: null,
     auctionId: 1,
-    auction: { externalId: 'a', title: 'catalog', status: 'READY' },
+    auction: {
+      externalId: 'a',
+      title: 'catalog',
+      status: 'READY',
+      startsAt: new Date(),
+      endsAt: null,
+    },
     ...over,
   } as CarWithAuction;
 }
@@ -194,7 +200,13 @@ describe('GET /api/cars — past/completed auctions excluded', () => {
             id: 3,
             lotUrl: 'https://x/3',
             lastSeenAt: new Date('2026-06-14T10:05:00Z'),
-            auction: { externalId: 'a', title: 'c', status: 'ENDED' },
+            auction: {
+              externalId: 'a',
+              title: 'c',
+              status: 'ENDED',
+              startsAt: new Date('2026-06-14T10:05:00Z'),
+              endsAt: null,
+            },
           }), // ended → excluded
         ] as CarWithAuction[],
     });
@@ -208,7 +220,9 @@ describe('GET /api/cars — past/completed auctions excluded', () => {
   });
 
   it('includes them when includeInactive=1', async () => {
-    const res = await request(app(storeWithStale())).get('/api/cars?includeInactive=1');
+    const res = await request(app(storeWithStale())).get(
+      '/api/cars?includeInactive=1&withinDays=all',
+    );
     expect(res.body.total).toBe(3);
   });
 
@@ -216,5 +230,77 @@ describe('GET /api/cars — past/completed auctions excluded', () => {
     const res = await request(app(fakeStore({ listRecentRuns: async () => [] }))).get('/api/cars');
     // default 3 fixtures: 1 matches filter (others fail year/gear), none excluded as stale
     expect(res.body.total).toBe(1);
+  });
+});
+
+describe('GET /api/cars — date horizon (next N days)', () => {
+  const T = new Date('2026-06-14T10:00:00Z');
+  const runs = [
+    { status: 'SUCCESS', startedAt: new Date('2026-06-14T09:00:00Z') },
+  ] as unknown as ScrapeRun[];
+  // Fix "now" deterministically.
+  const realNow = Date.now;
+  beforeAll(() => {
+    Date.now = () => T.getTime();
+  });
+  afterAll(() => {
+    Date.now = realNow;
+  });
+
+  function storeWithDates() {
+    return fakeStore({
+      listRecentRuns: async () => runs,
+      findCars: async () =>
+        [
+          mkCar({
+            id: 1,
+            lotUrl: 'https://x/soon',
+            lastSeenAt: new Date('2026-06-14T09:30:00Z'),
+            auction: {
+              externalId: 'a',
+              title: 'c',
+              status: 'READY',
+              startsAt: new Date('2026-06-17T08:00:00Z'),
+              endsAt: null,
+            }, // in 3 days
+          }),
+          mkCar({
+            id: 2,
+            lotUrl: 'https://x/far',
+            lastSeenAt: new Date('2026-06-14T09:30:00Z'),
+            auction: {
+              externalId: 'b',
+              title: 'c',
+              status: 'READY',
+              startsAt: new Date('2026-06-30T08:00:00Z'),
+              endsAt: null,
+            }, // in 16 days
+          }),
+          mkCar({
+            id: 3,
+            lotUrl: 'https://x/undated',
+            lastSeenAt: new Date('2026-06-14T09:30:00Z'),
+            auction: { externalId: 'd', title: 'c', status: 'READY', startsAt: null, endsAt: null }, // unknown date
+          }),
+        ] as CarWithAuction[],
+    });
+  }
+
+  it('defaults to the next 7 days (far + undated excluded)', async () => {
+    const res = await request(app(storeWithDates())).get('/api/cars');
+    expect(res.body.total).toBe(1);
+    expect(res.body.data[0].lotUrl).toBe('https://x/soon');
+    expect(res.body.withinDays).toBe(7);
+  });
+
+  it('widens with withinDays=30 (includes the far auction, still not the undated)', async () => {
+    const res = await request(app(storeWithDates())).get('/api/cars?withinDays=30');
+    expect(res.body.total).toBe(2);
+  });
+
+  it('withinDays=all drops the horizon entirely', async () => {
+    const res = await request(app(storeWithDates())).get('/api/cars?withinDays=all');
+    expect(res.body.total).toBe(3);
+    expect(res.body.withinDays).toBe('all');
   });
 });

@@ -20,7 +20,13 @@ export interface CarUpsertInput {
 }
 
 export interface CarWithAuction extends Car {
-  auction: { externalId: string; title: string; status: string };
+  auction: {
+    externalId: string;
+    title: string;
+    status: string;
+    startsAt: Date | null;
+    endsAt: Date | null;
+  };
 }
 
 /**
@@ -89,7 +95,11 @@ export async function findCars(args: {
   return prisma.car.findMany({
     where: args.where,
     orderBy: args.orderBy ?? { firstSeenAt: 'desc' },
-    include: { auction: { select: { externalId: true, title: true, status: true } } },
+    include: {
+      auction: {
+        select: { externalId: true, title: true, status: true, startsAt: true, endsAt: true },
+      },
+    },
   }) as Promise<CarWithAuction[]>;
 }
 

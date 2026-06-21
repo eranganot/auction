@@ -43,9 +43,11 @@ async function loadCars() {
   const body = document.getElementById('cars-body');
   const showInactive = document.getElementById('show-inactive');
   const inactiveParam = showInactive && showInactive.checked ? '&includeInactive=1' : '';
+  const withinEl = document.getElementById('within-days');
+  const withinParam = withinEl ? `&withinDays=${encodeURIComponent(withinEl.value)}` : '';
   try {
     const res = await fetch(
-      `/api/cars?sort=${encodeURIComponent(sortParam())}&pageSize=200${inactiveParam}`,
+      `/api/cars?sort=${encodeURIComponent(sortParam())}&pageSize=200${inactiveParam}${withinParam}`,
     );
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const json = await res.json();
@@ -53,14 +55,14 @@ async function loadCars() {
     document.getElementById('result-count').textContent =
       `נמצאו ${fmtInt(json.total)} רכבים תואמים`;
   } catch (err) {
-    body.innerHTML = `<tr><td colspan="11" class="p-6 text-center text-red-500">שגיאה בטעינת הנתונים</td></tr>`;
+    body.innerHTML = `<tr><td colspan="12" class="p-6 text-center text-red-500">שגיאה בטעינת הנתונים</td></tr>`;
   }
 }
 
 function renderCars(cars) {
   const body = document.getElementById('cars-body');
   if (!cars || cars.length === 0) {
-    body.innerHTML = `<tr><td colspan="11" class="p-6 text-center text-slate-400">אין רכבים תואמים</td></tr>`;
+    body.innerHTML = `<tr><td colspan="12" class="p-6 text-center text-slate-400">אין רכבים תואמים</td></tr>`;
     return;
   }
   body.innerHTML = cars
@@ -76,6 +78,7 @@ function renderCars(cars) {
         <td class="p-2">${c.ownershipLabel}</td>
         <td class="p-2">${fmtPrice(c.openingPrice)}</td>
         <td class="p-2">${fmtPrice(c.tariffPrice)}</td>
+        <td class="p-2">${fmtDate(c.auctionStartsAt)}</td>
         <td class="p-2">${fmtDate(c.lastSeenAt)}</td>
         <td class="p-2"><a class="text-blue-600 underline" href="${c.lotUrl}" target="_blank" rel="noopener">צפייה</a></td>
       </tr>`,
@@ -174,6 +177,8 @@ document.addEventListener('DOMContentLoaded', () => {
   wireSorting();
   const showInactive = document.getElementById('show-inactive');
   if (showInactive) showInactive.addEventListener('change', loadCars);
+  const withinDays = document.getElementById('within-days');
+  if (withinDays) withinDays.addEventListener('change', loadCars);
   loadFilter();
   loadCars();
   loadStatus();

@@ -81,7 +81,16 @@
 
         <!-- Main: results table -->
         <main class="lg:col-span-3">
-          <div class="mb-2 flex items-center justify-end">
+          <div class="mb-2 flex flex-wrap items-center justify-end gap-4">
+            <label class="flex items-center gap-2 text-sm text-slate-600">
+              טווח מכירות:
+              <select id="within-days" class="rounded border border-slate-300 p-1 text-sm">
+                <option value="7" selected>7 הימים הקרובים</option>
+                <option value="14">14 הימים הקרובים</option>
+                <option value="30">30 הימים הקרובים</option>
+                <option value="all">הכל</option>
+              </select>
+            </label>
             <label class="flex items-center gap-2 text-sm text-slate-600">
               <input type="checkbox" id="show-inactive" />
               הצג גם מכירות שהסתיימו
@@ -100,12 +109,13 @@
                   <th class="p-2">בעלות</th>
                   <th class="p-2" data-sort="openingPrice">מחיר פתיחה</th>
                   <th class="p-2" data-sort="tariffPrice">מחיר מחירון</th>
+                  <th class="p-2" data-sort="auctionStartsAt">תאריך מכירה</th>
                   <th class="p-2" data-sort="lastSeenAt">עודכן</th>
                   <th class="p-2">קישור</th>
                 </tr>
               </thead>
               <tbody id="cars-body">
-                <tr><td colspan="11" class="p-6 text-center text-slate-400">טוען…</td></tr>
+                <tr><td colspan="12" class="p-6 text-center text-slate-400">טוען…</td></tr>
               </tbody>
             </table>
           </div>
