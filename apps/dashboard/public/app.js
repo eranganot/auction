@@ -254,6 +254,30 @@ function urlBase64ToUint8Array(base64String) {
   return out;
 }
 
+function wireTestPush() {
+  const t = document.getElementById('test-push');
+  if (!t || t.dataset.wired) return;
+  t.dataset.wired = '1';
+  t.classList.remove('hidden');
+  t.addEventListener('click', async () => {
+    t.disabled = true;
+    const original = t.textContent;
+    try {
+      const res = await fetch('/api/push/test', { method: 'POST' });
+      const j = await res.json().catch(() => ({}));
+      if (res.ok && j.sent > 0) t.textContent = '✓ נשלחה התראת בדיקה';
+      else if (res.ok && j.subscribers === 0) t.textContent = 'אין מנויים — הפעל התראות קודם';
+      else t.textContent = 'שליחה נכשלה';
+    } catch (_e) {
+      t.textContent = 'שליחה נכשלה';
+    }
+    setTimeout(() => {
+      t.textContent = original;
+      t.disabled = false;
+    }, 3000);
+  });
+}
+
 async function initPush() {
   const btn = document.getElementById('enable-push');
   if (!btn) return;
@@ -273,7 +297,10 @@ async function initPush() {
   try {
     const reg = await navigator.serviceWorker.getRegistration();
     const existing = reg && (await reg.pushManager.getSubscription());
-    if (existing) return;
+    if (existing) {
+      wireTestPush();
+      return;
+    }
   } catch (_e) {
     /* ignore */
   }
@@ -300,6 +327,7 @@ async function initPush() {
       if (res.ok) {
         btn.textContent = '✓ התראות מופעלות';
         setTimeout(() => btn.classList.add('hidden'), 2500);
+        wireTestPush();
       } else {
         btn.disabled = false;
       }

@@ -109,8 +109,8 @@ Switch back to production with `npm run cap:sync`.
 
 ## Troubleshooting (PWA)
 
-| Symptom | Fix |
-|---|---|
-| No "Install" option in Chrome | Must be HTTPS; hard-refresh; verify `/manifest.webmanifest` and `/sw.js` load; check DevTools → Application → Manifest for errors. |
-| Old UI after a deploy | The service worker is network-first, so a refresh while online pulls the latest. If stuck, bump `CACHE` in `sw.js` (e.g. `-v2`) and redeploy. |
-| Icon looks wrong/cropped | Replace the icons in `public/icons/` (use the `-maskable` one for the adaptive shape) and redeploy. |
+| Symptom                       | Fix                                                                                                                                           |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| No "Install" option in Chrome | Must be HTTPS; hard-refresh; verify `/manifest.webmanifest` and `/sw.js` load; check DevTools → Application → Manifest for errors.            |
+| Old UI after a deploy         | The service worker is network-first, so a refresh while online pulls the latest. If stuck, bump `CACHE` in `sw.js` (e.g. `-v2`) and redeploy. |
+| Icon looks wrong/cropped      | Replace the icons in `public/icons/` (use the `-maskable` one for the adaptive shape) and redeploy.                                           |

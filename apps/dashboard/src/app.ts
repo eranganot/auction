@@ -17,6 +17,9 @@ export interface AppDeps {
   publicDir?: string;
   /** VAPID public key exposed at /api/push/vapid (defaults to env). */
   vapidPublicKey?: string;
+  /** VAPID private key + subject — enable test sends from the dashboard. */
+  vapidPrivateKey?: string;
+  vapidSubject?: string;
 }
 
 /**
@@ -28,6 +31,8 @@ export function createApp(deps: AppDeps = {}): Express {
   const logger = deps.logger ?? createLogger('info', { app: '@bidspirit/dashboard' });
   const publicDir = deps.publicDir ?? join(__dirname, '..', 'public');
   const vapidPublicKey = deps.vapidPublicKey ?? process.env.VAPID_PUBLIC_KEY;
+  const vapidPrivateKey = deps.vapidPrivateKey ?? process.env.VAPID_PRIVATE_KEY;
+  const vapidSubject = deps.vapidSubject ?? process.env.VAPID_SUBJECT;
 
   const app = express();
   app.disable('x-powered-by');
@@ -38,7 +43,14 @@ export function createApp(deps: AppDeps = {}): Express {
   app.use('/api/filters', filtersRouter(store));
   app.use('/api/status', statusRouter(store));
   app.use('/api/changes', changesRouter(store));
-  app.use('/api/push', pushRouter(store, { publicKey: vapidPublicKey }));
+  app.use(
+    '/api/push',
+    pushRouter(store, {
+      publicKey: vapidPublicKey,
+      privateKey: vapidPrivateKey,
+      subject: vapidSubject,
+    }),
+  );
 
   // Static Hebrew UI (index.html + app.js).
   app.use(express.static(publicDir));

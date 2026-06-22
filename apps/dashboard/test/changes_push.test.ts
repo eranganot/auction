@@ -61,14 +61,14 @@ describe('GET /api/changes', () => {
 describe('push endpoints', () => {
   it('reports disabled when no VAPID key', async () => {
     const res = await request(createApp({ store: baseStore() })).get('/api/push/vapid');
-    expect(res.body).toEqual({ enabled: false, publicKey: null });
+    expect(res.body).toEqual({ enabled: false, publicKey: null, subscribers: 0 });
   });
 
   it('exposes the VAPID public key when configured', async () => {
     const res = await request(createApp({ store: baseStore(), vapidPublicKey: 'PUBKEY' })).get(
       '/api/push/vapid',
     );
-    expect(res.body).toEqual({ enabled: true, publicKey: 'PUBKEY' });
+    expect(res.body).toEqual({ enabled: true, publicKey: 'PUBKEY', subscribers: 0 });
   });
 
   it('rejects an invalid subscription', async () => {

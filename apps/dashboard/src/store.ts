@@ -2,6 +2,7 @@ import {
   countCars,
   countNotifications,
   countPushSubscriptions,
+  deletePushSubscription,
   findCars,
   getActiveFilter,
   getLatestRun,
@@ -29,6 +30,7 @@ export interface Store {
   savePushSubscription: typeof savePushSubscription;
   listPushSubscriptions: typeof listPushSubscriptions;
   countPushSubscriptions: typeof countPushSubscriptions;
+  deletePushSubscription: typeof deletePushSubscription;
 }
 
 export const defaultStore: Store = {
@@ -43,4 +45,5 @@ export const defaultStore: Store = {
   savePushSubscription,
   listPushSubscriptions,
   countPushSubscriptions,
+  deletePushSubscription,
 };

@@ -8,7 +8,12 @@ export { createApp } from './app';
 function main(): void {
   const config = loadConfig();
   const logger = createLogger(config.logLevel, { app: DASHBOARD_APP });
-  const app = createApp({ logger, vapidPublicKey: config.webpush.publicKey });
+  const app = createApp({
+    logger,
+    vapidPublicKey: config.webpush.publicKey,
+    vapidPrivateKey: config.webpush.privateKey,
+    vapidSubject: config.webpush.subject,
+  });
   app.listen(config.port, () => {
     logger.info('dashboard listening', { port: config.port });
   });
