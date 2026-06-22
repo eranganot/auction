@@ -293,38 +293,60 @@ async function initPush() {
   if (!vapid || !vapid.enabled || !vapid.publicKey) return; // push not configured server-side
   if (Notification.permission === 'denied') return;
 
-  // Already subscribed? Keep the button hidden.
+  const keyBytes = urlBase64ToUint8Array(vapid.publicKey);
+
+  async function doSubscribe(reg) {
+    const sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: keyBytes,
+    });
+    const res = await fetch('/api/push/subscribe', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(sub),
+    });
+    return res.ok;
+  }
+
+  // Inspect any existing subscription; if it was made with a different VAPID key
+  // (keys were rotated) it can never receive pushes (403), so drop and recreate.
+  let reg;
   try {
-    const reg = await navigator.serviceWorker.getRegistration();
-    const existing = reg && (await reg.pushManager.getSubscription());
+    reg =
+      (await navigator.serviceWorker.getRegistration()) ||
+      (await navigator.serviceWorker.register('/sw.js'));
+    const existing = await reg.pushManager.getSubscription();
     if (existing) {
-      wireTestPush();
-      return;
+      const cur = new Uint8Array(existing.options.applicationServerKey || new ArrayBuffer(0));
+      const matches = cur.length === keyBytes.length && cur.every((b, i) => b === keyBytes[i]);
+      if (matches) {
+        wireTestPush();
+        return;
+      }
+      await existing.unsubscribe(); // stale key — remove and re-subscribe below
+    }
+    // No valid subscription. If permission is already granted, re-subscribe silently.
+    if (Notification.permission === 'granted') {
+      if (await doSubscribe(reg)) {
+        wireTestPush();
+        return;
+      }
     }
   } catch (_e) {
-    /* ignore */
+    /* fall through to the manual enable button */
   }
 
   btn.classList.remove('hidden');
   btn.addEventListener('click', async () => {
     btn.disabled = true;
     try {
-      const reg = await navigator.serviceWorker.register('/sw.js');
+      reg = reg || (await navigator.serviceWorker.register('/sw.js'));
       const perm = await Notification.requestPermission();
       if (perm !== 'granted') {
         btn.disabled = false;
         return;
       }
-      const sub = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(vapid.publicKey),
-      });
-      const res = await fetch('/api/push/subscribe', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(sub),
-      });
-      if (res.ok) {
+      if (await doSubscribe(reg)) {
         btn.textContent = '✓ התראות מופעלות';
         setTimeout(() => btn.classList.add('hidden'), 2500);
         wireTestPush();

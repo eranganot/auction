@@ -71,7 +71,7 @@ export class WebPushNotifier implements Notifier {
         sent++;
       } catch (err) {
         const status = (err as { statusCode?: number }).statusCode;
-        if (status === 404 || status === 410) {
+        if (status === 403 || status === 404 || status === 410) {
           await this.cfg.onExpired(sub.endpoint);
         } else {
           failures.push(`${sub.endpoint.slice(0, 40)}…: ${(err as Error).message}`);

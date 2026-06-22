@@ -93,7 +93,8 @@ export function pushRouter(store: Store, deps: PushDeps = {}): Router {
           sent++;
         } catch (err) {
           const code = (err as { statusCode?: number }).statusCode;
-          if (code === 404 || code === 410) await store.deletePushSubscription(s.endpoint);
+          if (code === 403 || code === 404 || code === 410)
+            await store.deletePushSubscription(s.endpoint);
           failed++;
           errors.push(`${code ?? '?'}: ${(err as Error).message}`.slice(0, 200));
         }
