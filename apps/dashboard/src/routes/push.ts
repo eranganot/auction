@@ -86,6 +86,7 @@ export function pushRouter(store: Store, deps: PushDeps = {}): Router {
       });
       let sent = 0;
       let failed = 0;
+      const errors: string[] = [];
       for (const s of subs) {
         try {
           await send({ endpoint: s.endpoint, p256dh: s.p256dh, auth: s.auth }, payload);
@@ -94,9 +95,10 @@ export function pushRouter(store: Store, deps: PushDeps = {}): Router {
           const code = (err as { statusCode?: number }).statusCode;
           if (code === 404 || code === 410) await store.deletePushSubscription(s.endpoint);
           failed++;
+          errors.push(`${code ?? '?'}: ${(err as Error).message}`.slice(0, 200));
         }
       }
-      return res.json({ subscribers: subs.length, sent, failed });
+      return res.json({ subscribers: subs.length, sent, failed, errors });
     }),
   );
 

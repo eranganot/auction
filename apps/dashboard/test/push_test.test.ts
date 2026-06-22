@@ -45,7 +45,8 @@ describe('POST /api/push/test', () => {
       app(pushRouter(store({ deletePushSubscription: del }), { sendImpl })),
     ).post('/api/push/test');
     expect(res.status).toBe(200);
-    expect(res.body).toEqual({ subscribers: 2, sent: 1, failed: 1 });
+    expect(res.body).toMatchObject({ subscribers: 2, sent: 1, failed: 1 });
+    expect(res.body.errors).toHaveLength(1);
     expect(sent).toEqual(['https://push/a']);
     expect(del).toHaveBeenCalledWith('https://push/gone');
   });
