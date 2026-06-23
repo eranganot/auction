@@ -40,7 +40,18 @@
         </div>
       </header>
 
-      <div class="grid grid-cols-1 gap-4 lg:grid-cols-4">
+      <nav class="mb-4 flex gap-1 border-b border-slate-200">
+        <button data-tab="cars"
+          class="tab-btn -mb-px border-b-2 border-blue-600 px-4 py-2 text-sm font-semibold text-blue-600">
+          רכבים
+        </button>
+        <button data-tab="changes"
+          class="tab-btn -mb-px border-b-2 border-transparent px-4 py-2 text-sm font-semibold text-slate-500 hover:text-slate-700">
+          שינויים יומיים
+        </button>
+      </nav>
+
+      <div id="tab-cars" class="grid grid-cols-1 gap-4 lg:grid-cols-4">
         <!-- Sidebar: filter settings -->
         <aside class="lg:col-span-1">
           <form id="filter-form" class="rounded-xl bg-white p-4 shadow">
@@ -86,13 +97,6 @@
             </button>
             <p id="filter-msg" class="mt-2 text-center text-sm"></p>
           </form>
-
-          <section class="mt-4 rounded-xl bg-white p-4 shadow">
-            <h2 class="mb-3 text-lg font-semibold">שינויים יומיים</h2>
-            <div id="changes-list" class="space-y-2 text-sm text-slate-700">
-              <p class="text-slate-400">טוען…</p>
-            </div>
-          </section>
         </aside>
 
         <!-- Main: results table -->
@@ -137,6 +141,15 @@
           </div>
           <p id="result-count" class="mt-2 text-sm text-slate-600"></p>
         </main>
+      </div>
+
+      <div id="tab-changes" class="hidden">
+        <section class="mx-auto max-w-2xl rounded-xl bg-white p-4 shadow">
+          <h2 class="mb-3 text-lg font-semibold">שינויים יומיים</h2>
+          <div id="changes-list" class="space-y-2 text-sm text-slate-700">
+            <p class="text-slate-400">טוען…</p>
+          </div>
+        </section>
       </div>
     </div>
 

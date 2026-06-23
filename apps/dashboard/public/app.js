@@ -179,6 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (showInactive) showInactive.addEventListener('change', loadCars);
   const withinDays = document.getElementById('within-days');
   if (withinDays) withinDays.addEventListener('change', loadCars);
+  wireTabs();
   loadFilter();
   loadCars();
   loadStatus();
@@ -186,6 +187,28 @@ document.addEventListener('DOMContentLoaded', () => {
   initPush();
   initPwa();
 });
+
+// ---------------------------------------------------------------------------
+// Tabs
+// ---------------------------------------------------------------------------
+function showTab(name) {
+  document.getElementById('tab-cars').classList.toggle('hidden', name !== 'cars');
+  document.getElementById('tab-changes').classList.toggle('hidden', name !== 'changes');
+  for (const b of document.querySelectorAll('.tab-btn')) {
+    const active = b.dataset.tab === name;
+    b.classList.toggle('border-blue-600', active);
+    b.classList.toggle('text-blue-600', active);
+    b.classList.toggle('border-transparent', !active);
+    b.classList.toggle('text-slate-500', !active);
+  }
+  if (name === 'changes') loadChanges();
+}
+
+function wireTabs() {
+  for (const b of document.querySelectorAll('.tab-btn')) {
+    b.addEventListener('click', () => showTab(b.dataset.tab));
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Daily changes panel
