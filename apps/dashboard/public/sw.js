@@ -1,7 +1,7 @@
 /* Service worker for Bidspirit: PWA install/offline shell + web push. */
 'use strict';
 
-const CACHE = 'bidspirit-shell-v1';
+const CACHE = 'bidspirit-shell-v2';
 const SHELL = [
   '/',
   '/index.html',
