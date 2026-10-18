@@ -26,13 +26,23 @@
     "dev:worker": "npm -w @bidspirit/worker run dev",
     "start:dashboard": "npm -w @bidspirit/dashboard run start",
     "start:worker": "npm -w @bidspirit/worker run start",
-    "worker:once": "npm -w @bidspirit/worker run once"
+    "worker:once": "npm -w @bidspirit/worker run once",
+    "cap": "cap",
+    "cap:sync": "cap sync android",
+    "cap:sync:dev": "cross-env CAPACITOR_DEV=1 cap sync android",
+    "cap:open": "cap open android",
+    "cap:run": "cap run android",
+    "android:assets": "capacitor-assets generate --android",
+    "android:install-debug": "adb install -r android/app/build/outputs/apk/debug/app-debug.apk"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^6.2.1",
     "@types/jest": "^29.5.12",
     "@types/node": "^20.14.0",
     "@typescript-eslint/eslint-plugin": "^7.13.0",
     "@typescript-eslint/parser": "^7.13.0",
+    "cross-env": "^7.0.3",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "jest": "^29.7.0",
@@ -40,5 +50,9 @@
     "rimraf": "^5.0.7",
     "ts-jest": "^29.1.5",
     "typescript": "^5.5.2"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.2.1",
+    "@capacitor/core": "^6.2.1"
   }
 }

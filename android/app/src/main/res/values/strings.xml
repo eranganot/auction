@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Car Auctions</string>
+    <string name="title_activity_main">Car Auctions</string>
+    <string name="package_name">com.bidspirit.carauctions</string>
+    <string name="custom_url_scheme">com.bidspirit.carauctions</string>
+</resources>

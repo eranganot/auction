@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Car Auctions Android network security policy.
+
+  Default: all traffic must be HTTPS (production talks to Railway over HTTPS).
+
+  Exception: cleartext HTTP is allowed ONLY for the LAN dev host (Express
+  dev server on your laptop) and the emulator loopback, so `cap:sync:dev`
+  builds can connect during development.
+
+  To change the dev IP, edit the <domain> below and re-run `npm run cap:sync:dev`.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <domain-config cleartextTrafficPermitted="true">
+        <!-- Your laptop's LAN IP running the dev server (edit to match). -->
+        <domain includeSubdomains="false">10.0.0.20</domain>
+        <!-- Emulator host loopback. -->
+        <domain includeSubdomains="false">10.0.2.2</domain>
+        <domain includeSubdomains="false">localhost</domain>
+    </domain-config>
+</network-security-config>
